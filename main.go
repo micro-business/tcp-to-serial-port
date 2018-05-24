@@ -67,7 +67,7 @@ func main() {
 		acceptChan := make(chan acceptResult)
 		acceptMore := make(chan bool)
 
-		go acceptFunc(listener, acceptChan, acceptMore)
+		go acceptConnection(listener, acceptChan, acceptMore)
 
 		ip2serialBuffer := make([]byte, 1024)
 		ipReadChan := make(chan readResult)
@@ -91,7 +91,7 @@ func main() {
 					if serialPort, serialError = serial.OpenPort(&serialConfig); serialError != nil {
 						log.Printf("Failed to open serial port: %s\n", serialError)
 					} else {
-						go readProc(currentConnection, ip2serialBuffer, ipReadChan, currentReadMore)
+						go readFromIO(currentConnection, ip2serialBuffer, ipReadChan, currentReadMore)
 					}
 				}
 
@@ -133,7 +133,7 @@ func main() {
 	}
 }
 
-func acceptFunc(listener net.Listener, acceptChann chan acceptResult, acceptMore chan bool) {
+func acceptConnection(listener net.Listener, acceptChann chan acceptResult, acceptMore chan bool) {
 	for {
 		log.Println("Waiting for connection...")
 
@@ -149,7 +149,7 @@ func acceptFunc(listener net.Listener, acceptChann chan acceptResult, acceptMore
 	}
 }
 
-func readProc(src io.Reader, buffer []byte, result chan readResult, readMore chan bool) {
+func readFromIO(src io.Reader, buffer []byte, result chan readResult, readMore chan bool) {
 	for {
 		bytesRead, err := src.Read(buffer)
 
