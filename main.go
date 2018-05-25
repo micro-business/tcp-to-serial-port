@@ -74,7 +74,7 @@ func main() {
 		var currentReadMore chan bool
 		var connectionError, serialError error
 		var serialPort *serial.Port
-		var ip2serialBuffer []byte
+		ip2serialBuffer := make([]byte, 1024)
 
 		ipReadChan := make(chan readResult)
 
@@ -91,7 +91,6 @@ func main() {
 					} else {
 						currentConnection = acceptResult.conn
 						currentReadMore = make(chan bool)
-						ip2serialBuffer = make([]byte, 1024)
 
 						go readFromIO(currentConnection, ip2serialBuffer, ipReadChan, currentReadMore)
 					}
