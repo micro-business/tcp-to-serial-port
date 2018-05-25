@@ -97,11 +97,16 @@ func main() {
 
 			case readResult := <-ipReadChan:
 				if readResult.err != nil {
-					log.Fatalf("Error reading from connection: %s", readResult.err)
+					if readResult.err == io.EOF {
+						log.Println("Active connection closed.")
+					} else {
+						log.Printf("Error reading from connection: %s", readResult.err)
+					}
+
 					connectionError = readResult.err
 				} else {
 					if _, serialError = serialPort.Write(ip2serialBuffer[0:readResult.bytesRead]); serialError != nil {
-						log.Fatalf("Error writing to serial port: %s", err)
+						log.Printf("Error writing to serial port: %s", err)
 					} else {
 						currentReadMore <- true
 					}
@@ -119,6 +124,7 @@ func main() {
 					}
 				}
 
+				ipReadChan = make(chan readResult)
 				currentConnection = nil
 				connectionError = nil
 				acceptMore <- true
@@ -163,7 +169,8 @@ func readFromIO(src io.Reader, buffer []byte, result chan readResult, readMore c
 
 func close(c io.Closer) {
 	err := c.Close()
+
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
