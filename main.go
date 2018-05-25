@@ -74,9 +74,9 @@ func main() {
 		var currentReadMore chan bool
 		var connectionError, serialError error
 		var serialPort *serial.Port
-		ipReadChan := make(chan readResult)
+		var ip2serialBuffer []byte
 
-		ip2serialBuffer := make([]byte, 1024)
+		ipReadChan := make(chan readResult)
 
 		for {
 			select {
@@ -84,13 +84,15 @@ func main() {
 				if acceptResult.err != nil {
 					log.Printf("Failed to accept the connection: %s", acceptResult.err)
 				} else {
-					currentConnection = acceptResult.conn
-					currentReadMore = make(chan bool)
 					serialConfig := serial.Config{Name: serialPortName, Baud: baudrate}
 
 					if serialPort, serialError = serial.OpenPort(&serialConfig); serialError != nil {
 						log.Printf("Failed to open serial port: %s\n", serialError)
 					} else {
+						currentConnection = acceptResult.conn
+						currentReadMore = make(chan bool)
+						ip2serialBuffer = make([]byte, 1024)
+
 						go readFromIO(currentConnection, ip2serialBuffer, ipReadChan, currentReadMore)
 					}
 				}
@@ -125,7 +127,7 @@ func main() {
 				}
 
 				if serialPort != nil {
-					serialPort.Close()
+					close(serialPort)
 					serialPort = nil
 				}
 
