@@ -91,6 +91,7 @@ func main() {
 					if serialPort, serialError = serial.OpenPort(&serialConfig); serialError != nil {
 						log.Printf("Failed to open serial port: %s\n", serialError)
 					} else {
+						ipReadChan = make(chan readResult)
 						go readFromIO(currentConnection, ip2serialBuffer, ipReadChan, currentReadMore)
 					}
 				}
@@ -124,7 +125,6 @@ func main() {
 					}
 				}
 
-				ipReadChan = make(chan readResult)
 				currentConnection = nil
 				connectionError = nil
 				acceptMore <- true
