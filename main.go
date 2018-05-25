@@ -69,14 +69,14 @@ func main() {
 
 		go acceptConnection(listener, acceptChan, acceptMore)
 
-		ip2serialBuffer := make([]byte, 1024)
-		ipReadChan := make(chan readResult)
-
 		// Things that belong to the current connection
 		var currentConnection net.Conn
 		var currentReadMore chan bool
 		var connectionError, serialError error
 		var serialPort *serial.Port
+		ipReadChan := make(chan readResult)
+
+		ip2serialBuffer := make([]byte, 1024)
 
 		for {
 			select {
