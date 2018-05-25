@@ -124,6 +124,11 @@ func main() {
 					}
 				}
 
+				if serialPort != nil {
+					serialPort.Close()
+					serialPort = nil
+				}
+
 				ipReadChan = make(chan readResult)
 				currentConnection = nil
 				connectionError = nil
